@@ -5,6 +5,7 @@ import {AppComponent} from './app.component';
 import {StoreModule} from "@ngrx/store";
 import {EffectsModule} from "@ngrx/effects";
 import {HomeModule} from "./home/home.module";
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   imports: [
@@ -12,7 +13,8 @@ import {HomeModule} from "./home/home.module";
     ReactiveFormsModule,
     StoreModule.forRoot([]),
     EffectsModule.forRoot([]),
-    HomeModule
+    HomeModule,
+    HttpClientModule
   ],
   declarations: [
     AppComponent
