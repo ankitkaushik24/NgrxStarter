@@ -1,35 +1,28 @@
-import { HttpClient } from "@angular/common/http";
 import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
-import { Subject, switchMap, tap } from "rxjs";
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HomeService } from "./home.service";
+import { IUser } from "./users.model";
+import { UsersServiceState } from "./users.service.state";
 
-const apiUrl = 'https://jsonplaceholder.typicode.com/users';
 
-type IUser = Record<'id' | 'name' | 'username' | 'email', string>;
 
 @Component({
   selector: 'home',
   templateUrl: './home.component.html',
   styles: [``],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    // HomeService,
+    UsersServiceState
+  ]
 })
 export class HomeComponent {
-  http = inject(HttpClient);
-  users$ = this.http.get<IUser[]>(apiUrl);
-  save$$ = new Subject<IUser>();
-  
+  // homeService = inject(HomeService);
+  usersService = inject(UsersServiceState);
+
+  // users$ = this.homeService.users$;
+  users$ = this.usersService.users$;
+
   edits = new Set();
-
-  updateUser$ = this.save$$.pipe(
-    switchMap((payload) => this.http.put<IUser>(`${apiUrl}/${payload.id}`, payload)),
-    tap((res) => {
-      this.edits.delete(res.id)
-    })
-  )
-
-  constructor() {
-    this.updateUser$.pipe(takeUntilDestroyed()).subscribe();
-  }
 
   columns: { header: string; key: string; readonly?: boolean; cell: (user: IUser) => string; }[] = [{
     header: 'ID',
@@ -53,13 +46,26 @@ export class HomeComponent {
   updatedData: Record<string, any> = {};
 
   onDataChange(id: string, name: string, val: string) {
-    this.updatedData[id] = {...this.updatedData[id], [name]: val};
+    this.updatedData[id] = { ...this.updatedData[id], [name]: val };
   }
 
   onSave(user: IUser) {
-    const payload = {...user, ...this.updatedData[user.id]};
+    const payload = { ...user, ...this.updatedData[user.id] };
     console.log(payload);
-    this.save$$.next(payload);
+
+    this.edits.delete(user.id);
+
+    // this.homeService.save$$.next({
+    //   payload, afterEffect: (res) => {
+    //     // this.edits.delete(res.id)
+    //   }
+    // });
+
+    this.usersService.save$$.next({
+      payload, afterEffect: (res) => {
+        // this.edits.delete(res.id)
+      }
+    });
   }
 
   onEdit(user: IUser) {
