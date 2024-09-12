@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 import { HomeService } from "./home.service";
 import { IUser } from "./users.model";
 import { UsersServiceState } from "./users.service.state";
+import { UsersDataService } from "./users-data.service";
+import { UsersDirective } from "./users.directive";
 
 
 
@@ -15,41 +17,14 @@ import { UsersServiceState } from "./users.service.state";
     UsersServiceState
   ]
 })
-export class HomeComponent {
+export class HomeComponent extends UsersDirective {
   // homeService = inject(HomeService);
   usersService = inject(UsersServiceState);
 
   // users$ = this.homeService.users$;
   users$ = this.usersService.users$;
 
-  edits = new Set();
-
-  columns: { header: string; key: string; readonly?: boolean; cell: (user: IUser) => string; }[] = [{
-    header: 'ID',
-    key: 'id',
-    readonly: true,
-    cell: (data) => data.id
-  }, {
-    header: 'Name',
-    key: 'name',
-    cell: user => user.name
-  }, {
-    header: 'Username',
-    key: 'username',
-    cell: user => user.username
-  }, {
-    header: 'Email',
-    key: 'email',
-    cell: user => user.email
-  }];
-
-  updatedData: Record<string, any> = {};
-
-  onDataChange(id: string, name: string, val: string) {
-    this.updatedData[id] = { ...this.updatedData[id], [name]: val };
-  }
-
-  onSave(user: IUser) {
+  override onSave(user: IUser) {
     const payload = { ...user, ...this.updatedData[user.id] };
     console.log(payload);
 
@@ -66,9 +41,5 @@ export class HomeComponent {
         // this.edits.delete(res.id)
       }
     });
-  }
-
-  onEdit(user: IUser) {
-    this.edits.add(user.id);
   }
 }

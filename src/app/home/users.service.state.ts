@@ -2,23 +2,24 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
 import { rxState } from "@rx-angular/state";
 import { Subject, switchMap, tap } from "rxjs";
-import { IUser, apiUrl } from "./users.model";
+import { IUser } from "./users.model";
+import { UsersDataService } from "./users-data.service";
 
 @Injectable()
 export class UsersServiceState {
     // actions
     save$$ = new Subject<{ payload: IUser; afterEffect: (user: IUser) => void; }>();
 
-    private http = inject(HttpClient);
+    private usersDataService = inject(UsersDataService);
 
     // event
     private userUpdated$ = this.save$$.pipe(
-        switchMap(({ payload, afterEffect }) => this.updateUser(payload).pipe(tap(afterEffect)))
+        switchMap(({ payload, afterEffect }) => this.usersDataService.updateUser(payload).pipe(tap(afterEffect)))
     );
 
     private state = rxState<{ users: IUser[] }>(({ set, connect }) => {
         // connect data source to state
-        connect('users', this.fetchUsers());
+        connect('users', this.usersDataService.fetchUsers());
 
         connect('users', this.userUpdated$, ({ users }, user) => {
             return this.onUpdated(user, users);
@@ -36,14 +37,4 @@ export class UsersServiceState {
             return item;
         });
     };
-
-    // API Fn
-    private fetchUsers() {
-        return this.http.get<IUser[]>(apiUrl);
-    }
-
-    // API Fn
-    private updateUser(payload: IUser) {
-        return this.http.put<IUser>(`${apiUrl}/${payload.id}`, payload);
-    }
 }
