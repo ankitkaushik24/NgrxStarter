@@ -7,6 +7,8 @@ import { IUser } from "./users.model";
 export class UsersDirective {
   edits = new Set();
 
+  isGlobalEdit = false;
+
   updatedData: Record<string, any> = {};
 
   columns: { header: string; key: string; readonly?: boolean; cell: (user: IUser) => string; }[] = [{
@@ -39,5 +41,9 @@ export class UsersDirective {
 
   onEdit(user: IUser) {
     this.edits.add(user.id);
+  }
+
+  onGlobalSave(users: IUser[]) {
+    throw new Error("GlobalSave not implmented!");
   }
 }

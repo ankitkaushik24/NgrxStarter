@@ -1,0 +1,17 @@
+<table>
+    <thead>
+        <tr>
+            <th *ngFor="let col of columns">{{col.header}}</th>
+            <th (click)="check()">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let user of usersSignal()">
+            <td *ngFor="let col of columns" [contentEditable]="!!edits.has(user().id) && !col.readonly" (input)="onDataChange(user().id, col.key, $any($event.target).textContent)">{{ col.cell(user()) }}</td>
+
+            <td> 
+                <button *ngIf="!edits.has(user().id)" (click)="onEdit(user())">Edit</button>
+                <button *ngIf="edits.has(user().id)" (click)="onSave(user())">Save</button> </td>
+        </tr>
+    </tbody>
+</table>

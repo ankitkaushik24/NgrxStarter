@@ -1,17 +1,33 @@
-<table>
-    <thead>
-        <tr>
-            <th *ngFor="let col of columns">{{col.header}}</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let user of users$ | async">
-            <td *ngFor="let col of columns" [contentEditable]="!!edits.has(user.id) && !col.readonly" (input)="onDataChange(user.id, col.key, $any($event.target).textContent)">{{ col.cell(user) }}</td>
 
-            <td> 
-                <button *ngIf="!edits.has(user.id)" (click)="onEdit(user)">Edit</button>
-                <button *ngIf="edits.has(user.id)" (click)="onSave(user)">Save</button> </td>
-        </tr>
-    </tbody>
-</table>
+
+<ng-container *ngIf="(users$ | async) as users; else loadingTemp">
+    <table>
+        <thead>
+            <tr>
+                <th *ngFor="let col of columns">{{col.header}}</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let user of users">
+                <td *ngFor="let col of columns" [contentEditable]="(isGlobalEdit || !!edits.has(user.id)) && !col.readonly" (input)="onDataChange(user.id, col.key, $any($event.target).textContent)">{{ col.cell(user) }}</td>
+    
+                <td> 
+                    <button *ngIf="!edits.has(user.id)" (click)="onEdit(user)">Edit</button>
+                    <button *ngIf="edits.has(user.id)" (click)="onSave(user)">Save</button> </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    <button [disabled]="isGlobalEdit" (click)="isGlobalEdit = true">Edit</button>
+                    <button [disabled]="!isGlobalEdit"  (click)="onGlobalSave(users)">Save</button>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</ng-container>
+
+<ng-template #loadingTemp>
+    Loading...
+</ng-template>

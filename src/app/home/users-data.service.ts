@@ -13,4 +13,8 @@ export class UsersDataService {
     updateUser(payload: IUser) {
         return this.http.put<IUser>(`${apiUrl}/${payload.id}`, payload);
     }
+
+    updateAllUsers(payload: IUser[]) {
+        return this.http.post<IUser[]>(`${apiUrl}`, payload);
+    }
 }
